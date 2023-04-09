@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokemon API</title>
+</head>
+<body>
+    <h2>Pokemons</h2>
+    <nav class="nav"></nav>
+    <main></main>
+    <script>
+        
+        let poke = document,
+        $main = poke.querySelector("main"),
+        $links = poke.querySelector(".nav");
+        let pokemonAPI = "https://pokeapi.co/api/v2/pokemon/?offset=25&limit=25";
+
+        async function Pokemons(url){
+            try{
+                let res = await fetch(url),
+                json = await res.json(),
+                $template= "",
+                $prev,
+                $next;
+                console.log(json);
+
+                if(!res.ok) throw {
+                    status : res.status, statusText: res.statusText
+                }
+
+                for(let i = 0; i < json.results.length; i++){
+                    try {
+                        let res = await fetch(json.results[i].url);
+                        let pokemon = await res.json();
+                        if(!res.ok) throw {
+                            status : res.status, statusText: res.statusText
+                        }
+                        $template += `
+                            <figure> 
+                                <img src="${pokemon.sprites.front_default}" alt="${pokemon.name}">
+                                <figcaption>${pokemon.name}</figcaption>
+                            </figure>
+                        `;
+                    } catch (err) {
+                        console.log(err);
+                        let message = err.statusText || "Error";
+                        $template += ` <figure> 
+
+                                <figcaption>Error</figcaption>
+                            </figure>
+                        `;
+                    }
+                }
+
+                $main.innerHTML = $template;
+
+            } catch (err) {
+                console.log(err);
+                let message = err.statusText || "Error";
+                $main.innerHTML = `<p>Error ${err.status}: ${message}</p>`;
+            }
+        }
+
+        poke.addEventListener("DOMContentLoaded", e => Pokemons(pokemonAPI));
+    </script>
+    
+</body>
+</html>
